@@ -2,23 +2,50 @@ import java.util.ArrayList;
 
 public class Blockchain {
 
-    public static ArrayList<Block> blockchain = new ArrayList<>();
+    private ArrayList<Block> chain;
 
-    public static void main(String[] args) {
+    public Blockchain() {
+        chain = new ArrayList<>();
+        chain.add(createGenesisBlock());
+    }
 
-        // Genesis block
-        blockchain.add(new Block("First Block", "0"));
+    private Block createGenesisBlock() {
+        return new Block("Genesis Block", "0");
+    }
 
-        blockchain.add(new Block("Second Block", blockchain.get(blockchain.size() - 1).hash));
+    public Block getLatestBlock() {
+        return chain.get(chain.size() - 1);
+    }
 
-        blockchain.add(new Block("Third Block", blockchain.get(blockchain.size() - 1).hash));
+    public void addBlock(String data) {
+        Block newBlock = new Block(data, getLatestBlock().getHash());
+        chain.add(newBlock);
+    }
 
-        // Print blockchain
-        for (Block block : blockchain) {
-            System.out.println("Data: " + block.data);
-            System.out.println("Hash: " + block.hash);
-            System.out.println("Previous Hash: " + block.previousHash);
-            System.out.println("-----------------------------------");
+    public boolean isChainValid() {
+        for (int i = 1; i < chain.size(); i++) {
+            Block current = chain.get(i);
+            Block previous = chain.get(i - 1);
+
+            // Check hash validity
+            if (!current.getHash().equals(current.calculateHash())) {
+                return false;
+            }
+
+            // Check chain link
+            if (!current.getPreviousHash().equals(previous.getHash())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public void printChain() {
+        for (Block block : chain) {
+            System.out.println("Data: " + block.getData());
+            System.out.println("Hash: " + block.getHash());
+            System.out.println("Previous Hash: " + block.getPreviousHash());
+            System.out.println("---------------------------");
         }
     }
 }
